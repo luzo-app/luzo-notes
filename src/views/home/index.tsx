@@ -15,6 +15,7 @@ import { Note, CreateNote } from "@/types/note";
 import { Tag } from "@/types/tag";
 
 import useCrypto from "@/hooks/use-crypto";
+import NoteCard from "./note-card";
 
 const HomePage = (): React.ReactNode => {
     const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +23,35 @@ const HomePage = (): React.ReactNode => {
     const [tags, setTags] = useState<Tag[]>([]);
 
     const { decryptData, encryptData } = useCrypto();
+
+    const getNotes = async () => {
+        try {
+            const { data } = await noteService.getNotes();
+            const decryptedNotes = data.map((note: Note) => ({
+                ...note,
+                title: decryptData(note.title).data,
+                content: decryptData(note.content).data,
+                createdAt: decryptData(note.createdAt).data,
+                updatedAt: decryptData(note.updatedAt).data,
+            }));
+            setNotes(decryptedNotes as Note[]);
+        } catch (error) {
+            processError(error);
+        }
+    }
+
+    const getTags = async () => {
+        try {
+            const { data } = await tagService.getTags();
+            const decryptedTags = data.map((tag: Tag) => ({
+                ...tag,
+                name: decryptData(tag.name).data,
+            }));
+            setTags(decryptedTags as Tag[]);
+        } catch (error) {
+            processError(error);
+        }
+    }
 
     const createNote = async (note: CreateNote) => {
         try {
@@ -32,8 +62,24 @@ const HomePage = (): React.ReactNode => {
                 createdAt: encryptData(note.createdAt).data as string,
                 updatedAt: encryptData(note.updatedAt).data as string,
             };
-            const response = await noteService.createNote(encryptedNote);
-            setNotes(prevNotes => [...prevNotes, response.data]);
+            const new_note = await noteService.createNote(encryptedNote);
+            const decryptedNote: Note = {
+                ...new_note,
+                title: decryptData(new_note.title).data as string,
+                content: decryptData(new_note.content).data as string,
+                createdAt: decryptData(new_note.createdAt).data as string,
+                updatedAt: decryptData(new_note.updatedAt).data as string,
+            };
+            setNotes(prevNotes => [...prevNotes, decryptedNote]);
+        } catch (error) {
+            processError(error);
+        }
+    }
+
+    const deleteNote = async (id: string) => {
+        try {
+            await noteService.deleteNote(id);
+            await getNotes();
         } catch (error) {
             processError(error);
         }
@@ -41,39 +87,8 @@ const HomePage = (): React.ReactNode => {
 
     useEffect(() => {
         setIsLoading(true);
-        const fetchNotes = async () => {
-            try {
-                const response = await noteService.getNotes();
-                const decryptedNotes = response.data.map((note: Note) => ({
-                    ...note,
-                    title: decryptData(note.title).data,
-                    content: decryptData(note.content).data,
-                    createdAt: decryptData(note.createdAt).data,
-                    updatedAt: decryptData(note.updatedAt).data,
-                }));
-                setNotes(decryptedNotes);
-            } catch (error) {
-                processError(error);
-            }
-        }
-        const fetchTags = async () => {
-            try {
-                const response = await tagService.getTags();
-                const decryptedTags = response.data.map((tag: Tag) => ({
-                    ...tag,
-                    name: decryptData(tag.name).data,
-                }));
-                setTags(decryptedTags);
-            } catch (error) {
-                processError(error);
-            }
-        }
-        Promise.all([
-            fetchNotes(),
-            fetchTags(),
-        ]).finally(() => {
-            setIsLoading(false);
-        });
+        Promise.all([getNotes(), getTags()]).finally(() => setIsLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -84,12 +99,21 @@ const HomePage = (): React.ReactNode => {
             tags={tags}
             setTags={setTags}
         >
-            <div className="space-y-4 p-4">
-                <Header />
-                <Sidebar />
+            <div className="flex h-full p-4">
+                <div className="w-64 border-r border-gray-200">
+                    <Sidebar />
+                </div>
+                <div className="flex-1 p-4">
+                    <Header />
+                    <ContentLayout loading={isLoading}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                            {notes.map((note) => (
+                                <NoteCard key={note._id} note={note} deleteNote={deleteNote} />
+                            ))}
+                        </div>
+                    </ContentLayout>
+                </div>
             </div>
-            <ContentLayout loading={isLoading}>
-            </ContentLayout>
         </NoteProvider>
     );
 }

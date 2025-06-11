@@ -3,6 +3,7 @@ import {
     API_URL,
     PREFIX_BASE_URL
 } from "@/api/constants";
+import { getCookie } from "@/lib/cookies";
 
 const api = axios.create({
     baseURL: `${API_URL}${PREFIX_BASE_URL}`,
@@ -10,7 +11,13 @@ const api = axios.create({
 
 // Add a request interceptor
 api.interceptors.request.use(
-    (config) => config,
+    (config) => {
+        const token = getCookie("token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
     (error) => Promise.reject(error)
 );
 

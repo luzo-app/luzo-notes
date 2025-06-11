@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Tag } from "./tag";
 
 type Note = {
-    id: string;
+    _id: string;
     title: string;
     content: string;
     tags: Tag[];
@@ -16,7 +16,7 @@ type Note = {
     updatedAt: string;
 }
 
-type CreateNote = Omit<Note, "id">;
+type CreateNote = Omit<Note, "_id">;
 
 type NoteContext = {
     notes: Note[];

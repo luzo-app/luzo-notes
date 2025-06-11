@@ -48,11 +48,11 @@ const Sidebar = (): React.ReactNode => {
                     <span className="text-sm font-medium text-muted-foreground">Tags</span>
                     {tags.map((tag) => (
                         <Button
-                            variant={view === "notes" && getQueryParam("tagId") === tag.id ? "secondary" : "ghost"}
+                            variant={view === "notes" && getQueryParam("tagId") === tag._id ? "secondary" : "ghost"}
                             className="w-full justify-start"
-                            key={tag.id}
+                            key={tag._id}
                             onClick={() => {
-                                setQueryParam("tagId", tag.id);
+                                setQueryParam("tagId", tag._id);
                             }}
                             disabled={view !== "notes"}
                         >
