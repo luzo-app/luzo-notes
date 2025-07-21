@@ -1,0 +1,12 @@
+services:
+  web:
+    image: luzo-notes:latest
+    container_name: luzo-notes
+    deploy:
+      replicas: 1
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.luzo-notes.rule=Host(`notes.luzo-app.fr`)
+        - traefik.http.routers.luzo-notes.entrypoints=web
+        - traefik.http.services.luzo-notes.loadbalancer.server.port=80
+    restart: always
