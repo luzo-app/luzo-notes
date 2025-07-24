@@ -9,7 +9,7 @@ import { PaginatedResponse } from "@/types/api";
 
 const noteService = {
     getNotes: async (): Promise<PaginatedResponse<Note>> => {
-        const { data } = await api.get("/notes");
+        const { data } = await api.get("/notes/");
         return data;
     },
     createNote: async (note: CreateNote): Promise<Note> => {
