@@ -12,7 +12,7 @@ COPY package.json pnpm-lock.yaml ./
 FROM base AS build
 
 ARG VITE_API_URL=https://api.luzo-app.fr
-ARG VITE_DOMAIN=*.luzo-app.fr
+ARG VITE_DOMAIN=.luzo-app.fr
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_DOMAIN=${VITE_DOMAIN}
 
