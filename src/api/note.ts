@@ -17,11 +17,11 @@ const noteService = {
         return data;
     },
     updateNote: async (note: Note): Promise<Note> => {
-        const { data } = await api.put(`/notes/${note._id}/`, note);
+        const { data } = await api.put(`/notes/${note._id}`, note);
         return data;
     },
     deleteNote: async (id: Note['_id']): Promise<void> => {
-        await api.delete(`/notes/${id}/`);
+        await api.delete(`/notes/${id}`);
     },
 }
 
